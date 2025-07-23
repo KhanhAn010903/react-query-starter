@@ -7,7 +7,13 @@ import UserDeleteModal from './modal/user.delete.modal';
 import UsersPagination from './pagination/users.pagination';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
+import { useQuery } from '@tanstack/react-query';
 
+interface IUser {
+    id: number;
+    name: string,
+    email: string;
+}
 function UsersTable() {
 
     const [isOpenCreateModal, setIsOpenCreateModal] = useState<boolean>(false);
@@ -16,24 +22,6 @@ function UsersTable() {
     const [dataUser, setDataUser] = useState({});
 
     const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
-
-    const users = [
-        {
-            "id": 1,
-            "name": "Eric",
-            "email": "eric@gmail.com"
-        },
-        {
-            "id": 2,
-            "name": "Hỏi Dân IT",
-            "email": "hoidanit@gmail.com"
-        },
-        {
-            "id": 3,
-            "name": "Hỏi Dân IT",
-            "email": "admin@gmail.com"
-        }
-    ]
 
     const handleEditUser = (user: any) => {
         setDataUser(user);
@@ -60,7 +48,15 @@ function UsersTable() {
             </Popover>
         )
     })
-
+    const { isPending, error, data } = useQuery({
+        queryKey: ['fetchUser'],
+        queryFn: (): Promise<IUser[]> =>
+            fetch('http://localhost:8000/users').then((res) =>
+                res.json(),
+            ),
+    })
+    if (isPending) return 'Loading...'
+    if (error) return 'An error has occurred: ' + error.message
 
     return (
         <>
@@ -80,7 +76,7 @@ function UsersTable() {
                     </tr>
                 </thead>
                 <tbody>
-                    {users?.map(user => {
+                    {data?.map(user => {
                         return (
                             <tr key={user.id}>
                                 <OverlayTrigger trigger="click" placement="right"
