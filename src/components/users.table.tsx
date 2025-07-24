@@ -7,7 +7,8 @@ import UserDeleteModal from './modal/user.delete.modal';
 import UsersPagination from './pagination/users.pagination';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { calculatePagesCount } from '../helper';
 
 interface IUser {
     id: number;
@@ -15,7 +16,9 @@ interface IUser {
     email: string;
 }
 function UsersTable() {
-
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
+    const PAGE_SIZE = 2;
     const [isOpenCreateModal, setIsOpenCreateModal] = useState<boolean>(false);
 
     const [isOpenUpdateModal, setIsOpenUpdateModal] = useState<boolean>(false);
@@ -58,11 +61,15 @@ function UsersTable() {
     })
 
     const { isPending, error, data } = useQuery({
-        queryKey: ['fetchUser'],
+        queryKey: ['fetchUser', currentPage],
         queryFn: (): Promise<IUser[]> =>
-            fetch('http://localhost:8000/users').then((res) =>
-                res.json(),
+            fetch(`http://localhost:8000/users?_page=${currentPage}&_limit=${PAGE_SIZE}`).then((res) => {
+                const total_items = +(res.headers?.get("X-Total-Count") ?? 0)
+                setTotalPages(calculatePagesCount(PAGE_SIZE, total_items))
+                return res.json()
+            },
             ),
+        placeholderData: keepPreviousData,
     })
     if (isPending) return 'Loading...'
     if (error) return 'An error has occurred: ' + error.message
@@ -117,7 +124,9 @@ function UsersTable() {
                 </tbody>
             </Table>
             <UsersPagination
-                totalPages={0}
+                totalPages={totalPages}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
             />
             <UserCreateModal
                 isOpenCreateModal={isOpenCreateModal}

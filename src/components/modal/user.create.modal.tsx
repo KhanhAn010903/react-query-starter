@@ -3,12 +3,33 @@ import Modal from 'react-bootstrap/Modal';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
+interface IUser {
+    name: string;
+    email: string;
+}
 const UserCreateModal = (props: any) => {
     const { isOpenCreateModal, setIsOpenCreateModal } = props;
 
     const [email, setEmail] = useState<string>("");
     const [name, setName] = useState<string>("");
+    const mutation = useMutation({
+        mutationFn: async (payload: IUser) => {
+            const res = await fetch('http://localhost:8000/users', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: payload.email,
+                    name: payload.name
+                }),
+                headers: {
+                    'Content-Type': 'application/josn'
+                }
+            })
+            return res.json();
+        }
+    })
+
 
     const handleSubmit = () => {
         if (!email) {
@@ -20,6 +41,9 @@ const UserCreateModal = (props: any) => {
             return;
         }
         //call api => call redux
+        mutation.mutate({
+            email: email, name: name
+        })
         console.log({ email, name }) //payload
     }
 
