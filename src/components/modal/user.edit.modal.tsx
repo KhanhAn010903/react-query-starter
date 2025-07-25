@@ -112,7 +112,7 @@ const UserEditModal = (props: any) => {
                                 size='sm'
                                 role='status'
                                 aria-hidden='true'
-                            /><></> Saving...
+                            /><></> Updating...
                         </Button>}
                 </Modal.Footer>
             </Modal>

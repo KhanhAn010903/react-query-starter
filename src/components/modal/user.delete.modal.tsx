@@ -60,7 +60,7 @@ const UserDeleteModal = (props: any) => {
                                 size='sm'
                                 role='status'
                                 aria-hidden='true'
-                            /><></> Saving...
+                            /><></> Deleting...
                         </Button>}
                 </Modal.Footer>
         </Modal>
